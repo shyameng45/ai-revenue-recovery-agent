@@ -1,0 +1,6 @@
+.env
+venv/
+__pycache__/
+*.pyc
+app/data/recovery.db
+.DS_Store
