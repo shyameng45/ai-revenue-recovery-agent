@@ -1,0 +1,278 @@
+So we have been assigned for a DBMS project as group of 5, with 6 day deadline, build me a tracker called GrooupSync that watches for tasks that wer assigned but never aknnowledged, instead of showing task percentages.
+Snehas situation got triggered as she , was never aknowlledged about her task assignments , and also she was not in the group as well
+Rohan, the owner is sient on all this, build it in a way that it ca take action alert when someone is silent
+make it efficient enough that the system frontend and db naming is not dangerous and system should catche if there is something fishy before late as multiple people work on frontend parallel, and nobody locks the field/table names between their work.
+make the system in a way that it doesn't automatically trigger critical alert on some situational error like wifi outage
+make it look like stat tilles alert panel  , in dark grey theme.
+
+Yes — this can be made into a proper DBMS project, not just a task list.
+
+The core idea for GrooupSync should be:
+
+Don't measure “how much work is completed.” Measure whether work is acknowledged, ownership is clear, people are responsive, and the project structure is becoming unsafe.
+
+GrooupSync — proposed system
+
+Main dashboard
+
+Dark-grey UI
+Large stat tiles:
+🔴 Unacknowledged Tasks
+🟠 Silent Members
+🟡 Assignment Conflicts
+🔵 System Health
+🟢 Active Members
+Alert panel underneath
+Timeline showing what happened and when
+Member status: Active / Waiting / Silent / At Risk / Offline
+Task status: Assigned → Acknowledged → In Progress → Submitted
+The important logic
+
+For Sneha's situation:
+
+Task assigned to Sneha
+        ↓
+Is Sneha actually a group member?
+        ↓
+NO
+        ↓
+STRUCTURAL ALERT
+"Assignment targets a non-member"
+        ↓
+Notify group owner
+
+If Sneha is a member but doesn't acknowledge:
+
+Assignment created
+      ↓
+No acknowledgement
+      ↓
+Grace period
+      ↓
+WARNING
+"Task has not been acknowledged"
+      ↓
+Still no response
+      ↓
+ESCALATED ALERT
+
+For Rohan:
+
+Rohan owns the group
+        ↓
+No acknowledgement/action
+        ↓
+No response to alerts
+        ↓
+No task activity
+        ↓
+"Owner Silent" alert
+
+But importantly, Wi-Fi outage should NOT immediately become a critical alert.
+
+Smart alert engine
+
+I'd use an evidence-based severity model:
+
+Signal	Result
+1 missed heartbeat	Ignore / informational
+Temporary network failure	Warning
+Multiple consecutive failures	Investigate
+Other members active but one member remains silent	Higher risk
+Assignment unacknowledged past threshold	Warning
+Non-member assigned a task	Structural alert
+Owner silent + unresolved alerts	Escalation
+Multiple independent signals	Critical
+
+So the system doesn't say:
+
+❌ "Rohan is offline → CRITICAL"
+
+Instead:
+
+⚠️ "Rohan has not acknowledged 2 assignments and has shown no activity for 4 hours."
+
+That's much more defensible for a DBMS project.
+
+Parallel frontend/database safety
+
+This is actually a very good feature for your project.
+
+I'd add a Schema & Naming Guard:
+
+Developer A creates:
+task_status
+
+Developer B creates:
+taskStatus
+
+Developer C creates:
+status
+
+GrooupSync catches potential conflicts before they reach production.
+
+It can check:
+
+duplicate table names
+duplicate column names
+inconsistent naming conventions
+reserved SQL keywords
+orphan foreign keys
+assignments to nonexistent members
+tasks without owners
+members missing from groups
+duplicate task IDs
+conflicting migrations
+frontend IDs/routes that collide
+API fields that don't match DB fields
+
+And show:
+
+SYSTEM INTEGRITY
+────────────────────────
+✓ Database naming       PASS
+✓ Foreign keys          PASS
+⚠ Assignment integrity  2 issues
+⚠ UI registry           1 collision
+✓ API contract          PASS
+
+That gives you a real DBMS concept, rather than making GrooupSync just another CRUD application.
+
+Suggested database
+
+I'd keep it manageable for the 6-day deadline:
+
+users
+groups
+group_members
+tasks
+task_assignments
+acknowledgements
+activity_events
+alerts
+system_heartbeats
+schema_registry
+integrity_checks
+
+Important relationships:
+
+users
+  │
+  ├── group_members ── groups
+  │
+  └── task_assignments ── tasks
+                              │
+                              └── acknowledgements
+
+activity_events ── users
+alerts ── users/groups/tasks
+schema_registry ── database safety
+integrity_checks ── system safety
+Dashboard concept
+┌──────────────────────────────────────────────────────────────┐
+│  GROOUPSYNC                              DBMS PROJECT         │
+│  Team Coordination & Risk Monitor                            │
+├──────────────┬──────────────┬──────────────┬─────────────────┤
+│      07      │      02      │      01      │       04        │
+│ Unacknowledged│ Silent       │ Conflicts    │ Active Members  │
+├──────────────┴──────────────┴──────────────┴─────────────────┤
+│                                                              │
+│  ⚠ ALERT PANEL                                               │
+│                                                              │
+│  🔴 Assignment targets non-member                            │
+│     Sneha → Database Schema Task                             │
+│     Action required: Add member / reassign task              │
+│                                                              │
+│  🟠 Owner inactive                                           │
+│     Rohan has not acknowledged pending alerts                │
+│                                                              │
+│  🟡 Frontend naming collision                                │
+│     taskStatus / task_status                                 │
+│                                                              │
+├──────────────────────────────────────────────────────────────┤
+│ SYSTEM HEALTH                                                │
+│                                                              │
+│  Database       ● Healthy                                    │
+│  API            ● Healthy                                    │
+│  Activity       ● Monitoring                                 │
+│  Schema Guard   ● 2 issues detected                          │
+└──────────────────────────────────────────────────────────────┘
+Tech stack I'd recommend for your 6-day deadline
+
+Frontend
+
+HTML
+CSS
+JavaScript
+Dark grey dashboard
+
+Backend
+
+Node.js
+Express
+
+Database
+
+SQLite for development/demo
+SQL schema + foreign keys + indexes
+
+This is much safer than trying to build React + Spring Boot + MySQL + authentication + WebSockets in six days.
+
+For the DBMS viva, you can demonstrate:
+
+Primary keys
+Foreign keys
+Normalization
+Constraints
+JOINs
+Indexing
+Transactions
+Triggers
+Views
+SQL queries
+Referential integrity
+Audit/activity logs
+6-day division for your 5 members
+
+Member 1 — Database
+
+ER diagram
+Tables
+relationships
+constraints
+indexes
+sample data
+
+Member 2 — Backend
+
+Express API
+task/assignment APIs
+acknowledgement APIs
+alert engine
+
+Member 3 — Frontend
+
+dashboard
+stat tiles
+alert panel
+member/task views
+
+Member 4 — Integrity/Safety
+
+Schema Guard
+naming collision detection
+orphan assignment detection
+consistency checks
+
+Member 5 — Integration
+
+connect frontend + backend
+testing
+demo scenarios
+documentation/PPT
+
+And don't let everyone directly modify the same DB schema. Keep one schema.sql/migration owner and make the Schema Guard part of the project itself.
+
+If you want, I can take this specification and actually build the runnable GrooupSync starter project with the database, backend, dashboard UI, alert engine, sample Sneha/Rohan scenario, and schema-integrity checker as a downloadable ZIP.
+
+,
