@@ -3,10 +3,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pathlib import Path
 
-from app.database import Base, engine
+from app.database import Base, engine, SessionLocal
 from app.routers import recovery_router
+from app.models.models import Payment
+from app.data.seed import seed
 
 Base.metadata.create_all(bind=engine)
+
+db = SessionLocal()
+try:
+    if db.query(Payment).count() == 0:
+        seed()
+finally:
+    db.close()
 
 app = FastAPI(
     title="AI Revenue Recovery Agent",
