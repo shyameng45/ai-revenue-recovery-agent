@@ -25,6 +25,7 @@ h1{font-size:25px;margin:0}.sub{color:var(--muted);font-size:13px;margin-top:4px
 .btn{border:1px solid #2a4a53;background:#10242b;color:var(--text);padding:11px 15px;border-radius:10px;cursor:pointer}
 .btn:hover{border-color:var(--cyan);transform:translateY(-1px)}
 .btn.primary{background:#123d3e;border-color:#2f8e84;color:#bffcf3}
+.btn.danger{border-color:#694047;background:#28191d;color:#ffb8bf}
 .btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
 .status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}.status-sep{color:#36525a}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 14px var(--green)}
@@ -66,7 +67,7 @@ h1{font-size:25px;margin:0}.sub{color:var(--muted);font-size:13px;margin-top:4px
 .insight p{margin:0;color:var(--muted);font-size:12px;max-width:650px;line-height:1.55}
 .mini-ring{width:92px;height:92px;min-width:92px;border-radius:50%;border:7px solid #1c3b42;border-top-color:var(--cyan);display:flex;flex-direction:column;align-items:center;justify-content:center;margin-left:20px}
 .mini-ring span{font-weight:800;font-size:18px}.mini-ring small{font-size:9px;color:var(--muted);margin-top:2px}
-.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
 .quick-btn{border:1px solid #25434b;background:#0b1d23;color:var(--text);border-radius:11px;padding:12px 10px;text-align:left;cursor:pointer}
 .quick-btn:hover{border-color:var(--cyan);background:#10262d}
 .quick-btn span{font-size:12px;font-weight:700;margin-left:5px}
@@ -89,6 +90,7 @@ h1{font-size:25px;margin:0}.sub{color:var(--muted);font-size:13px;margin-top:4px
         <button class="btn" id="refreshBtn" onclick="loadAll()">↻ Refresh</button>
         <button class="btn primary" id="recoverBtn" onclick="runRecovery()">⚡ Run Recovery Agent</button>
         <button class="btn" id="simulateBtn" onclick="simulateOutcomes()">◉ Simulate Outcomes</button>
+        <button class="btn danger" id="resetBtn" onclick="resetDemo()">↺ Reset Demo</button>
       </div>
       <div class="status" style="justify-content:flex-end;margin-top:9px">
         <span class="dot"></span> Agent online
@@ -129,6 +131,7 @@ h1{font-size:25px;margin:0}.sub{color:var(--muted);font-size:13px;margin-top:4px
         <button class="quick-btn" onclick="runRecovery()">⚡ <span>Run agent</span><small>Detect → recover</small></button>
         <button class="quick-btn" onclick="simulateOutcomes()">◉ <span>Simulate</span><small>Test outcomes</small></button>
         <button class="quick-btn" onclick="loadAll()">↻ <span>Refresh</span><small>Reload live data</small></button>
+        <button class="quick-btn" onclick="resetDemo()">↺ <span>Reset demo</span><small>Start a fresh batch</small></button>
       </div>
     </div>
   </section>
@@ -257,6 +260,17 @@ async function simulateOutcomes(){
     await loadAll();
   }catch(e){toast(`Simulation failed: ${e.message}`)}
   finally{$('simulateBtn').disabled=false; $('simulateBtn').textContent='◉ Simulate Outcomes'}
+}
+
+async function resetDemo(){
+  if(!confirm('Reset the synthetic demo data and start a fresh recovery batch?')) return;
+  $('resetBtn').disabled=true; $('resetBtn').textContent='⏳ Resetting...';
+  try{
+    await api('/api/reset-demo',{method:'POST'});
+    toast('Fresh demo batch created. Recovery queue is ready.');
+    await loadAll();
+  }catch(e){toast(`Reset failed: ${e.message}`)}
+  finally{$('resetBtn').disabled=false; $('resetBtn').textContent='↺ Reset Demo'}
 }
 
 loadAll();

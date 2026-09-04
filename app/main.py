@@ -10,6 +10,7 @@ from app.data.seed import seed
 
 Base.metadata.create_all(bind=engine)
 
+# Seed a fresh empty database automatically for the hosted demo.
 db = SessionLocal()
 try:
     if db.query(Payment).count() == 0:
