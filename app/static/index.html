@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Revenue Recovery Agent</title>
+<style>
+:root{
+  --bg:#071014; --panel:#0d1a20; --panel2:#10232a; --line:#20353d;
+  --text:#eef7f8; --muted:#8ca3aa; --cyan:#4de3d0; --green:#64e6a5;
+  --amber:#ffc86b; --red:#ff7d87; --shadow:0 18px 50px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(circle at 80% -10%,#12343b 0,transparent 35%),var(--bg);
+font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text)}
+button{font:inherit}
+.shell{max-width:1540px;margin:auto;padding:34px 38px;position:relative}
+.hero-glow{position:absolute;width:520px;height:240px;right:-160px;top:-100px;background:rgba(77,227,208,.09);filter:blur(80px);pointer-events:none}
+.top{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:28px}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:52px;height:52px;border:1px solid #2d5962;border-radius:16px;display:grid;place-items:center;background:linear-gradient(145deg,#12353b,#0b2026);font-size:24px;color:var(--cyan);box-shadow:0 0 30px rgba(77,227,208,.08)}
+h1{font-size:25px;margin:0}.sub{color:var(--muted);font-size:13px;margin-top:4px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{border:1px solid #2a4a53;background:#10242b;color:var(--text);padding:11px 15px;border-radius:10px;cursor:pointer}
+.btn:hover{border-color:var(--cyan);transform:translateY(-1px)}
+.btn.primary{background:#123d3e;border-color:#2f8e84;color:#bffcf3}
+.btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}.status-sep{color:#36525a}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 14px var(--green)}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.card{background:linear-gradient(145deg,rgba(16,35,42,.98),rgba(9,22,27,.98));border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow)}
+.card:hover{border-color:#2a4b53}
+.metric-label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+.metric-value{font-size:32px;font-weight:800;margin-top:9px;letter-spacing:-.02em}
+.metric-note{font-size:12px;color:#789098;margin-top:6px}
+.grid{display:grid;grid-template-columns:1.35fr .9fr;gap:18px}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+.section-title h2{font-size:17px;margin:0}.section-title span{color:var(--muted);font-size:12px}
+.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;font-size:13px}
+.table th{text-align:left;color:#7f989f;font-weight:600;border-bottom:1px solid var(--line);padding:11px 9px}
+.table td{border-bottom:1px solid #182b32;padding:12px 9px;vertical-align:top}
+.badge{display:inline-flex;padding:4px 8px;border-radius:99px;font-size:11px;border:1px solid #31525b;background:#12262d}
+.badge.soft{color:var(--amber)}.badge.hard{color:var(--red)}.badge.ok{color:var(--green)}
+.small-btn{border:1px solid #31535b;background:#10252c;color:#d9eeee;padding:7px 9px;border-radius:8px;cursor:pointer;font-size:11px}
+.audit{max-height:440px;overflow:auto}.event{padding:13px 0;border-bottom:1px solid #193039}
+.event:last-child{border-bottom:0}.event-top{display:flex;justify-content:space-between;gap:10px}
+.event-name{font-weight:650;font-size:13px}.time{font-size:11px;color:#6f878f}
+.event-meta{color:var(--muted);font-size:11px;margin-top:5px}
+.message{margin-top:8px;background:#09171c;border:1px solid #1d353c;padding:9px;border-radius:9px;color:#bdd0d4;font-size:12px;line-height:1.45}
+.empty{color:var(--muted);padding:30px 5px;text-align:center}
+.footer{margin-top:20px;color:#617980;font-size:11px;text-align:center}
+.toast{position:fixed;right:22px;bottom:22px;background:#10272d;border:1px solid #31545d;color:#e9ffff;padding:12px 15px;border-radius:10px;box-shadow:var(--shadow);display:none;max-width:360px}
+@media(max-width:1050px){.metrics{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+@media(max-width:650px){.shell{padding:16px}.top{align-items:flex-start;flex-direction:column}.metrics{grid-template-columns:1fr}.metric-value{font-size:25px}}
+
+.flow{display:flex;align-items:center;gap:10px;background:rgba(9,22,27,.72);border:1px solid var(--line);padding:13px 16px;border-radius:15px;margin-bottom:16px}
+.flow-step{display:grid;grid-template-columns:auto 1fr;column-gap:9px;align-items:center;min-width:145px}
+.flow-step b{grid-row:span 2;font-size:11px;color:#52727a}
+.flow-step span{font-size:12px;font-weight:700}.flow-step small{font-size:10px;color:var(--muted)}
+.flow-step.active span{color:var(--cyan)}
+.flow-line{height:1px;background:#28434a;flex:1}
+.insight-row{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;margin-bottom:18px}
+.insight{display:flex;justify-content:space-between;align-items:center;min-height:130px}
+.insight h3{font-size:19px;margin:8px 0 5px;letter-spacing:-.02em}
+.insight p{margin:0;color:var(--muted);font-size:12px;max-width:650px;line-height:1.55}
+.mini-ring{width:92px;height:92px;min-width:92px;border-radius:50%;border:7px solid #1c3b42;border-top-color:var(--cyan);display:flex;flex-direction:column;align-items:center;justify-content:center;margin-left:20px}
+.mini-ring span{font-weight:800;font-size:18px}.mini-ring small{font-size:9px;color:var(--muted);margin-top:2px}
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.quick-btn{border:1px solid #25434b;background:#0b1d23;color:var(--text);border-radius:11px;padding:12px 10px;text-align:left;cursor:pointer}
+.quick-btn:hover{border-color:var(--cyan);background:#10262d}
+.quick-btn span{font-size:12px;font-weight:700;margin-left:5px}
+.quick-btn small{display:block;color:var(--muted);font-size:9px;margin:5px 0 0 23px}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="hero-glow"></div>
+  <header class="top">
+    <div class="brand">
+      <div class="logo">✦</div>
+      <div>
+        <h1>AI Revenue Recovery Agent</h1>
+        <div class="sub">Detect failed payments → diagnose → recover → audit</div>
+      </div>
+    </div>
+    <div>
+      <div class="actions">
+        <button class="btn" id="refreshBtn" onclick="loadAll()">↻ Refresh</button>
+        <button class="btn primary" id="recoverBtn" onclick="runRecovery()">⚡ Run Recovery Agent</button>
+        <button class="btn" id="simulateBtn" onclick="simulateOutcomes()">◉ Simulate Outcomes</button>
+      </div>
+      <div class="status" style="justify-content:flex-end;margin-top:9px">
+        <span class="dot"></span> Agent online
+        <span class="status-sep">•</span> Live recovery console
+      </div>
+    </div>
+  </header>
+
+  <section class="flow">
+    <div class="flow-step active"><b>01</b><span>Detect</span><small>Failed payments</small></div>
+    <div class="flow-line"></div>
+    <div class="flow-step"><b>02</b><span>Diagnose</span><small>AI reasoning</small></div>
+    <div class="flow-line"></div>
+    <div class="flow-step"><b>03</b><span>Recover</span><small>Smart action</small></div>
+    <div class="flow-line"></div>
+    <div class="flow-step"><b>04</b><span>Log</span><small>Audit trail</small></div>
+  </section>
+
+  <section class="metrics">
+    <div class="card"><div class="metric-label">Revenue at risk</div><div class="metric-value" id="risk">₹0</div><div class="metric-note">Failed + retrying</div></div>
+    <div class="card"><div class="metric-label">Recovered</div><div class="metric-value" id="recovered">₹0</div><div class="metric-note">Successfully recovered</div></div>
+    <div class="card"><div class="metric-label">Recovery rate</div><div class="metric-value" id="rate">0%</div><div class="metric-note">Recovered / total failed ever</div></div>
+    <div class="card"><div class="metric-label">Recovery actions</div><div class="metric-value" id="attempts">0</div><div class="metric-note">Logged in audit trail</div></div>
+  </section>
+
+  <section class="insight-row">
+    <div class="insight card">
+      <div>
+        <div class="metric-label">Recovery engine</div>
+        <h3>Turn failed payments into recovered revenue.</h3>
+        <p>The agent detects failure patterns, chooses a recovery action, and records every decision.</p>
+      </div>
+      <div class="mini-ring"><span id="ringRate">0%</span><small>recovery</small></div>
+    </div>
+    <div class="quick card">
+      <div class="section-title"><h2>Demo Controls</h2><span>Safe synthetic data</span></div>
+      <div class="quick-grid">
+        <button class="quick-btn" onclick="runRecovery()">⚡ <span>Run agent</span><small>Detect → recover</small></button>
+        <button class="quick-btn" onclick="simulateOutcomes()">◉ <span>Simulate</span><small>Test outcomes</small></button>
+        <button class="quick-btn" onclick="loadAll()">↻ <span>Refresh</span><small>Reload live data</small></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <div class="section-title"><h2>Recovery Queue</h2><span id="queueCount">0 payments</span></div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Payment</th><th>Amount</th><th>Failure</th><th>Type</th><th>Retries</th></tr></thead>
+          <tbody id="queueBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><h2>Agent Activity</h2><span>Latest actions</span></div>
+      <div class="audit" id="audit"></div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:18px">
+    <div class="section-title"><h2>Payment Monitor</h2><span id="paymentCount">0 records</span></div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Customer</th><th>Plan</th><th>Amount</th><th>Status</th><th>Failure</th><th>Diagnosis</th></tr></thead>
+        <tbody id="paymentsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="footer">Synthetic demo data • AI Revenue Recovery Agent • Built for Razorpay AI Buildathon 2026</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const money = n => new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(Number(n||0));
+const esc = s => String(s ?? '').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+
+function toast(msg){
+  const el=$('toast'); el.textContent=msg; el.style.display='block';
+  clearTimeout(window._toast); window._toast=setTimeout(()=>el.style.display='none',3200);
+}
+
+async function api(path, opts={}){
+  const res=await fetch(path,opts);
+  const text=await res.text();
+  let data; try{data=JSON.parse(text)}catch{data=text}
+  if(!res.ok) throw new Error(typeof data==='string'?data:(data.detail||`Request failed (${res.status})`));
+  return data;
+}
+
+async function loadMetrics(){
+  const m=await api('/api/metrics');
+  $('risk').textContent=money(Number(m.still_failed||0)+Number(m.in_retry||0));
+  $('recovered').textContent=money(m.recovered_amount);
+  $('rate').textContent=`${m.recovery_rate_percent ?? 0}%`;
+  $('ringRate').textContent=`${m.recovery_rate_percent ?? 0}%`;
+  $('attempts').textContent=m.total_recovery_attempts ?? 0;
+}
+
+async function loadQueue(){
+  const q=await api('/api/queue');
+  $('queueCount').textContent=`${q.length} payment${q.length===1?'':'s'}`;
+  $('queueBody').innerHTML=q.length?q.map(x=>`
+    <tr>
+      <td><strong>#${esc(x.payment_id)}</strong></td>
+      <td>${money(x.amount)}</td>
+      <td>${esc(String(x.failure_reason||'—').replaceAll('_',' '))}</td>
+      <td><span class="badge ${String(x.classification||'').toLowerCase().includes('hard')?'hard':'soft'}">${esc(x.classification||'unknown')}</span></td>
+      <td>${esc(x.retries_used ?? 0)}</td>
+    </tr>`).join(''):`<tr><td colspan="5"><div class="empty">No failed payments waiting for recovery.</div></td></tr>`;
+}
+
+async function loadPayments(){
+  const p=await api('/api/payments');
+  $('paymentCount').textContent=`${p.length} record${p.length===1?'':'s'}`;
+  $('paymentsBody').innerHTML=p.length?p.map(x=>{
+    const status=String(x.status||'').toLowerCase();
+    const cls=status.includes('recover')?'ok':(status.includes('fail')?'hard':'soft');
+    return `<tr>
+      <td><strong>${esc(x.customer)}</strong></td>
+      <td>${esc(x.plan)}</td>
+      <td>${money(x.amount)}</td>
+      <td><span class="badge ${cls}">${esc(x.status)}</span></td>
+      <td>${esc(String(x.failure_reason||'—').replaceAll('_',' '))}</td>
+      <td>${esc(x.diagnosis_note||'—')}</td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="6"><div class="empty">No payment records found.</div></td></tr>`;
+}
+
+async function loadAudit(){
+  const a=await api('/api/audit-trail?limit=25');
+  $('audit').innerHTML=a.length?a.map(x=>`
+    <div class="event">
+      <div class="event-top"><div class="event-name">${esc(x.customer)} · #${esc(x.payment_id)}</div><div class="time">${esc(new Date(x.created_at).toLocaleString())}</div></div>
+      <div class="event-meta">${esc(x.action_type)} · ${esc(x.outcome||'logged')}</div>
+      ${x.message_sent?`<div class="message">${esc(x.message_sent)}</div>`:''}
+    </div>`).join(''):`<div class="empty">No recovery actions logged yet.</div>`;
+}
+
+async function loadAll(){
+  $('refreshBtn').disabled=true;
+  try{
+    await Promise.all([loadMetrics(),loadQueue(),loadPayments(),loadAudit()]);
+  }catch(e){toast(`Could not load data: ${e.message}`)}
+  finally{$('refreshBtn').disabled=false}
+}
+
+async function runRecovery(){
+  $('recoverBtn').disabled=true; $('recoverBtn').textContent='⏳ Running...';
+  try{
+    const r=await api('/api/recover',{method:'POST'});
+    toast('Recovery cycle completed. Dashboard refreshed.');
+    await loadAll();
+  }catch(e){toast(`Recovery failed: ${e.message}`)}
+  finally{$('recoverBtn').disabled=false; $('recoverBtn').textContent='⚡ Run Recovery Agent'}
+}
+
+async function simulateOutcomes(){
+  $('simulateBtn').disabled=true; $('simulateBtn').textContent='⏳ Simulating...';
+  try{
+    await api('/api/simulate-outcomes',{method:'POST'});
+    toast('Simulated outcomes applied. Metrics refreshed.');
+    await loadAll();
+  }catch(e){toast(`Simulation failed: ${e.message}`)}
+  finally{$('simulateBtn').disabled=false; $('simulateBtn').textContent='◉ Simulate Outcomes'}
+}
+
+loadAll();
+</script>
+</body>
+</html>
